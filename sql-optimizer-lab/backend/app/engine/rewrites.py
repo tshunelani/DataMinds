@@ -25,7 +25,9 @@ def generate_rule_candidates(sql: str, dialect: str) -> list[Rewrite]:
         t = tree.copy()
         distinct = t.find(exp.Distinct)
         if distinct:
-            distinct.replace(distinct.this.copy())
+            parent = distinct.parent
+            if parent is not None:
+                parent.set("distinct", None)
             out.append(Rewrite("remove_distinct", _render(t, dialect), "Removes DISTINCT when the query shape may not require duplicate elimination. Validate semantic equivalence."))
 
     # Make a safe-looking IN rewrite for OR equality chains.
@@ -112,7 +114,7 @@ def generate_rule_candidates(sql: str, dialect: str) -> list[Rewrite]:
     seen = set()
     unique = []
     for item in out:
-        normalized = sqlglot.transpile(item.sql, read=mapping_read(dialect), write=mapping_write(dialect))[0]
+        normalized = sqlglot.parse_one(item.sql, read=mapping_read(dialect)).sql(dialect=mapping_write(dialect), pretty=True)
         key = normalized.strip().lower()
         if (item.executable and key == sql.strip().lower()) or (key in seen and item.executable):
             continue

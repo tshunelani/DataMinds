@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, BrainCircuit, Gauge, Play, Sparkles, Square, Zap } from 'lucide-react';
+import { Activity, BrainCircuit, Copy, Gauge, Play, Sparkles, Square, Zap } from 'lucide-react';
 import ConnectionPanel, { Connection } from './ConnectionPanel';
 import QueryEditor from './QueryEditor';
 import { DiffEditor } from '@monaco-editor/react';
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [schema, setSchema] = useState<any>(null);
   const [schemaMsg, setSchemaMsg] = useState('');
   const [jobId, setJobId] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState('');
 
   const loadSchema = async()=>{ setSchemaMsg('Loading…'); try { const r=await post<any>('/api/connections/schema', conn); setSchema(r); setSchemaMsg(`${r.tables?.length||0} tables loaded`); } catch(e) { setSchemaMsg(String(e)); } };
 
@@ -38,6 +39,7 @@ export default function Dashboard() {
   };
 
   const stop = async()=>{ if (!jobId) return; try { const cancelled = await post<any>(`/api/jobs/${jobId}/cancel`, {}); setJob(cancelled); } catch(e) { setJob((old:any)=>({...old, error:String(e)})); } };
+  const copyOptimizedSql = async()=>{ if (!best?.sql) return; await navigator.clipboard.writeText(best.sql); setCopyMessage('Copied'); setTimeout(()=>setCopyMessage(''), 1500); };
 
   const records = useMemo(()=>[job?.baseline, ...(job?.iterations||[])].filter(Boolean), [job]);
   const best = job?.best;
@@ -55,7 +57,7 @@ export default function Dashboard() {
         <div className="grid gap-4 xl:grid-cols-2"><div className="panel p-4"><div className="mb-3 flex items-center gap-2"><BrainCircuit size={17}/><h2 className="font-bold">Learning policy</h2></div><pre className="overflow-auto text-xs text-slate-400">{JSON.stringify(job?.learning||{}, null, 2)}</pre></div><div className="panel p-4"><div className="mb-3 flex items-center gap-2"><Gauge size={17}/><h2 className="font-bold">Index recommendations</h2></div>{(job?.index_recommendations||[]).map((x:string,i:number)=><div key={i} className="mb-2 rounded-lg border border-slate-800 p-3 text-sm text-slate-300">{x}</div>)}{!(job?.index_recommendations||[]).length && <p className="text-sm muted">Recommendations will appear after plan analysis.</p>}</div></div>
         <div className="panel p-4"><div className="mb-3 flex items-center gap-2"><Gauge size={17}/><h2 className="font-bold">Optimization checks</h2></div>{(job?.optimization_advisories||[]).map((x:string,i:number)=><div key={i} className="mb-2 rounded-lg border border-slate-800 p-3 text-sm text-slate-300">{x}</div>)}{!(job?.optimization_advisories||[]).length && <p className="text-sm muted">Query-shape checks will appear after optimization starts.</p>}</div>
         <div className="panel p-4"><div className="mb-3 flex items-center gap-2"><Zap size={17}/><h2 className="font-bold">Performance history</h2></div><div className="overflow-auto"><table className="w-full text-left text-xs"><thead><tr className="border-b border-slate-800 text-slate-500"><th className="p-2">Iteration</th><th>Operator</th><th>Time</th><th>Plan cost</th><th>Reward</th><th>Status</th></tr></thead><tbody>{records.map((r:any)=><tr className="border-b border-slate-900" key={r.candidate_id}><td className="p-2">{r.iteration}</td><td>{r.operator}</td><td>{r.metric?.elapsed_ms?.toFixed(1)||'—'} ms</td><td>{r.metric?.plan_cost??'—'}</td><td>{r.reward?.toFixed(2)||'—'}</td><td>{r.status}</td></tr>)}</tbody></table></div></div>
-        {best && best.sql !== sql && <div className="panel p-4"><h2 className="mb-3 font-bold">Original vs. optimized SQL</h2><div className="h-[360px] overflow-hidden rounded-xl border border-slate-800"><DiffEditor theme="vs-dark" language="sql" original={sql} modified={best.sql} options={{readOnly:true,minimap:{enabled:false},automaticLayout:true,fontSize:12}} /></div><p className="mt-3 text-sm muted">{best.explanation}</p></div>}
+        {best && best.sql !== sql && <div className="panel p-4"><div className="mb-3 flex items-center justify-between"><h2 className="font-bold">Original vs. optimized SQL</h2><button className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-bold hover:border-cyan-500" onClick={copyOptimizedSql}><Copy className="mr-2 inline" size={15}/>Copy optimized SQL</button></div><div className="h-[360px] overflow-hidden rounded-xl border border-slate-800"><DiffEditor theme="vs-dark" language="sql" original={sql} modified={best.sql} options={{readOnly:true,minimap:{enabled:false},automaticLayout:true,fontSize:12}} /></div><p className="mt-3 text-sm muted">{copyMessage || best.explanation}</p></div>}
         {schema && <div className="panel p-4"><h2 className="mb-2 font-bold">Schema snapshot</h2><p className="mb-3 text-xs text-slate-500">{schemaMsg}</p><pre className="max-h-72 overflow-auto text-xs text-slate-400">{JSON.stringify(schema, null, 2)}</pre></div>}
         {job?.error && <div className="panel border-red-900 p-4 text-sm text-red-300"><Activity className="mr-2 inline" size={15}/>{job.error}</div>}
       </section>

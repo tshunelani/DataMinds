@@ -103,3 +103,15 @@ Optimize LIKE wildcards: Avoid leading wildcards (LIKE '%term'), which force a f
 
 Avoid implicit type conversions: Ensure query parameters match column data types (e.g., comparing a string variable to an integer column) to prevent forced implicit functions that bypass indexes.
 
+### Second Iteration enhancements
+The query on the optimized sql textbox should be formatted to sql standard. Currently, the results is in a single line.
+
+Add a copy button on the optimized sql textbox for copying out the sql
+
+## Issues
+When there is a distinct keyword in the original sql, the optimizer fails. This shouldn't happen. At the bottom, the application has this message "'NoneType' object has no attribute 'copy'". Patch this.
+
+When there is a syntax error to the query, the optimizer runs indefinitely. In this case would like the application to pick up from the database engine the exception and raise it on screen inside the application and stop execution on the application
+
+
+

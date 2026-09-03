@@ -20,9 +20,10 @@ class OptimizerService:
 
     async def run(self, job: OptimizeJob):
         req = self.request
-        validate_read_only(req.sql)
-        executor = DBExecutor(req.connection, req.timeout_ms)
+        executor = None
         try:
+            validate_read_only(req.sql)
+            executor = DBExecutor(req.connection, req.timeout_ms)
             if job.cancel_requested:
                 job.status = "cancelled"
                 await self.emit({"type": "completed", "job": job.model_dump()})
@@ -95,7 +96,8 @@ class OptimizerService:
             job.error = str(exc)
             await self.emit({"type": "error", "error": str(exc), "job": job.model_dump()})
         finally:
-            executor.close()
+            if executor is not None:
+                executor.close()
 
     async def _evaluate(self, executor, rewrite, iteration, baseline_ms):
         try:
