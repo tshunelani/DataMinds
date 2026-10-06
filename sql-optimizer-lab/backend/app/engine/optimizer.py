@@ -40,7 +40,16 @@ class OptimizerService:
             seen = {self._fingerprint(req.sql)}
             all_rewrites = generate_rule_candidates(req.sql, req.connection.db_type)
             if req.use_llm and generate_llm_candidates:
-                all_rewrites.extend(await generate_llm_candidates(req.sql, req.connection.db_type))
+                job.llm_status = "Generating OpenAI candidates"
+                await self.emit({"type": "llm", "job": job.model_dump()})
+                llm_generation = await generate_llm_candidates(req.sql, req.connection.db_type)
+                job.llm_status = llm_generation.status
+                job.llm_error = llm_generation.error
+                job.llm_candidates_generated = len(llm_generation.candidates)
+                all_rewrites.extend(llm_generation.candidates)
+                await self.emit({"type": "llm", "job": job.model_dump()})
+            elif req.use_llm:
+                job.llm_status = "Unavailable: LLM module could not be loaded"
             job.optimization_advisories = list(dict.fromkeys(r.rationale for r in all_rewrites if not r.executable))[:12]
             # bounded pool
             pool = []

@@ -59,6 +59,9 @@ class OptimizeJob(BaseModel):
     job_id: str
     status: Literal["queued", "running", "completed", "failed", "cancelled"]
     cancel_requested: bool = False
+    llm_status: str = "Not requested"
+    llm_candidates_generated: int = 0
+    llm_error: str | None = None
     progress: int = 0
     baseline: IterationRecord | None = None
     iterations: list[IterationRecord] = Field(default_factory=list)

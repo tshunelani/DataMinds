@@ -1,0 +1,20 @@
+
+> sql-optimizer-lab@1.0.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.3.3 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.3.13.160:3000
+- Environments: .env.local
+✓ Ready in 8.9s
+✓ Running next.config.ts took 412ms
+
+○ Compiling / ...
+ GET / 200 in 14.6s (next.js: 13.7s, application-code: 859ms)
+ GET / 200 in 322ms (next.js: 168ms, application-code: 154ms)
+ GET / 200 in 531ms (next.js: 187ms, application-code: 345ms)
+ GET / 200 in 165ms (next.js: 56ms, application-code: 108ms)
+ GET / 200 in 145ms (next.js: 24ms, application-code: 121ms)
+ GET / 200 in 406ms (next.js: 101ms, application-code: 305ms)
+ GET / 200 in 137ms (next.js: 46ms, application-code: 91ms)
+ GET / 200 in 168ms (next.js: 47ms, application-code: 121ms)

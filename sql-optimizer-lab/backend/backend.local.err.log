@@ -1,0 +1,10 @@
+INFO:     Will watch for changes in these directories: ['C:\\Users\\tshunelanim\\OneDrive - MIP Holdings (Pty) Ltd\\Desktop\\Work\\sql optimizer\\sql-optimizer-lab\\backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [17536] using WatchFiles
+INFO:     Started server process [30312]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52541 - "WebSocket /api/jobs/6b960256-d1a1-4604-b955-b28a85f6016a/ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:57075 - "WebSocket /api/jobs/bfd75427-ac23-407e-a614-94a8c1cf4cf5/ws" [accepted]
+INFO:     connection open
